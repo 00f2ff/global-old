@@ -13,6 +13,9 @@ Example algorithms are as follows:
 - Generate the NRs and PCs, quantity of edges between them, and demanded resources
 
 
+In the short term, this should just save to localStorage. 
+
+
 
 
 

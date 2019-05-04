@@ -11,35 +11,53 @@ import Edge from './common/edge';
 //   );
 // }
 
+// todo: I think that PC/NR and vertices need to be the same thing. 
+// figure out how to structure the data that way
 class Game extends React.Component {
+  /**
+   * The network initializes mutably, but after that point we keep immutable copies in a history
+   * 
+   * @param {*} props 
+   */
   constructor(props) {
     super(props);
     this.state = {
-      network: new Network([])
+
+      network: new Network([]),
+      width: 1000,
+      height: 1000,
     }
+  }
+
+  createLocation(value) {
+    return new Vertex(value, Math.random() * this.state.width, Math.random() * this.state.height);
   }
 
   // todo: when I do this for real, it'll need a bit more error handling that exits well
   populateNetwork() {
-    const a = new Vertex("a");
-    const b = new Vertex("b");
-    const c = new Vertex("c");
-    const aToB = new Edge(1);
-    const aToC = new Edge(2);
-    const bToC = new Edge(2);
-    const addedA = this.state.network.addVertex(a);
-    if (addedA.success) this.setState({network: addedA});
-    const addedB = this.state.network.addVertex(b);
-    if (addedB.success) this.setState({network: addedB});
-    const addedC = this.state.network.addVertex(c);
-    if (addedC.success) this.setState({network: addedC})
+    console.log(this.state.network)
 
-    const addedAtoB = this.state.network.addEdge(a, b, aToB);
-    if (addedAtoB.success) this.setState({network: addedAtoB});
-    const addedAtoC = this.state.network.addEdge(a, c, aToC);
-    if (addedAtoC.success) this.setState({network: addedAtoC});
-    const addedBtoC = this.state.network.addEdge(b, c, bToC);
-    if (addedBtoC.success) this.setState({network: addedBtoC});
+    const a = this.createLocation("a"),
+          b = this.createLocation("b"),
+          c = this.createLocation("c");
+
+    const aToB = new Edge(a, b, 1),
+          aToC = new Edge(a, c, 2),
+          bToC = new Edge(b, c, 2);
+
+    const addedA = this.state.network.addVertex(a);
+    if (addedA.success) this.setState({network: addedA.value});
+    const addedB = this.state.network.addVertex(b);
+    if (addedB.success) this.setState({network: addedB.value});
+    const addedC = this.state.network.addVertex(c);
+    if (addedC.success) this.setState({network: addedC.value})
+
+    const addedAtoB = this.state.network.addEdge(aToB);
+    if (addedAtoB.success) this.setState({network: addedAtoB.value});
+    const addedAtoC = this.state.network.addEdge(aToC);
+    if (addedAtoC.success) this.setState({network: addedAtoC.value});
+    const addedBtoC = this.state.network.addEdge(bToC);
+    if (addedBtoC.success) this.setState({network: addedBtoC.value});
 
 
   }
@@ -50,7 +68,7 @@ class Game extends React.Component {
   // Can be used on props to make them all top-level 
   // ES6: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
   // Is var-args
-  renderTableData() {
+  // renderTableData() {
     // return (for (const [k, v] of this.state.network) {
     //     return (<tr key={k}> 
     //       <td>{k}</td>
@@ -58,14 +76,14 @@ class Game extends React.Component {
     //     </tr>);
     //   });
       
-    return [...this.state.network].map((entry, index) => { // note: this exercise may not be worthwhile. think more about what I want UI to include
-      let value = this.state.network.get(entry)
-      return (<tr key={index}> 
-        <td>{entry}</td>
-        <td>{this.state.network.get(entry)}</td>
-      </tr>);
-    });
-  }
+    // return [...this.state.network].map((entry, index) => { 
+    //   let value = this.state.network.get(entry)
+    //   return (<tr key={index}> 
+    //     <td>{entry}</td>
+    //     <td>{this.state.network.get(entry)}</td>
+    //   </tr>);
+    // });
+  // }
 
   render() {
     this.populateNetwork();
@@ -78,7 +96,7 @@ class Game extends React.Component {
         </tr>
         </thead>
         <tbody>
-          {this.renderTableData()}
+          {/* {this.renderTableData()} */}
         </tbody>
       </table>
     )

@@ -1,6 +1,4 @@
 import Try from "./try";
-// import Vertex from "./vertex";
-// import Edge from "./edge";
 
 // todo: should I create some internal type for what each of these maps is?
 /**
@@ -8,9 +6,10 @@ import Try from "./try";
  * 
  * The form is:
  * {vertex1: [
- * 	{vertex2: [edge, edge, edge]},
- *  {vertex3}: [edge]
+ * 	{vertex2: edge},
+ *  {vertex3: edge}
  * ]}
+ * and in the future multiple edges will be provided
  * 
  * This internal map is a normal Map, and symbolizes the multiple edges with different values that can 
  * connect two vertices.
@@ -19,7 +18,7 @@ import Try from "./try";
  */
 class Network extends Map {
 
-	has(key, value){
+	has(key){
 		super.has(key);
 	}
 
@@ -40,30 +39,29 @@ class Network extends Map {
 		if (this.has(vertex)) {
 			return new Try(`Vertex ${vertex} is already in graph`, false);
 		} else {
-			return new Try(this.set(vertex, []), true);
+			return new Try(this.set(vertex, undefined), true);
 		}
 	}
 
 	// todo: consider collecting errors a la ValidatedNel
 	/**
 	 * Adds an edge connecting two vertices. 
-	 * Will fail if either the from or to vertices are not present in the graph.
+	 * Will fail if either the from or to vertices are not present in the graph, or if edge already exists (temp).
 	 * 
-	 * @param {Vertex} from 
-	 * @param {Vertex} to 
-	 * @param {Edge} edge 
+	 * @param {Edge} edge
 	 */
-	addEdge(from, to, edge) {
-		if (!this.has(from)) {
-			return new Try(`Vertex: ${from} is not in the graph`, false);
-		} else if (!this.has(to)) {
-			return new Try(`Vertex: ${to} is not in the graph`, false);
+	addEdge(edge) {
+		if (!this.has(edge.from)) {
+			return new Try(`Vertex: ${edge.from} is not in the graph`, false);
+		} else if (!this.has(edge.to)) {
+			return new Try(`Vertex: ${edge.to} is not in the graph`, false);
 		} else {
-			const fromVertex = this.get(from);
-			if (fromVertex.has(to)) {
-				return new Try(this.set(from, fromVertex.set(to, fromVertex.get(to).push(edge))), true);
+			const fromVertex = this.get(edge.from);
+			if (fromVertex.has(edge.to)) {
+				// todo: this will need to be changed to allow multiple edges
+				return new Try(`Edge: ${edge} already exists in the graph`, false); 
 			} else {
-				return new Try(this.set(from, fromVertex.set(to, [edge])), true);
+				return new Try(this.set(edge.from, fromVertex.set(edge.to, edge)), true);
 			}
 		}
 	}
