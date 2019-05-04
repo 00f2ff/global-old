@@ -1,4 +1,4 @@
-import Try from "./try";
+import Exception from "./exception";
 
 // todo: should I create some internal type for what each of these maps is?
 /**
@@ -18,18 +18,6 @@ import Try from "./try";
  */
 class Network extends Map {
 
-	has(key){
-		super.has(key);
-	}
-
-	get(key){
-		super.get(key);
-	}
-
-	set(key, value){
-			super.set(key, value);
-	}
-
 	/**
 	 * Add a vertex to the graph. Does not need to connect to other vertices by an edge.
 	 * 
@@ -37,32 +25,35 @@ class Network extends Map {
 	 */
 	addVertex(vertex) {
 		if (this.has(vertex)) {
-			return new Try(`Vertex ${vertex} is already in graph`, false);
+			throw new Exception(`Vertex ${vertex} is already in graph`);
 		} else {
-			return new Try(this.set(vertex, undefined), true);
+			console.log(this)
+			return this.set(vertex, null);
 		}
 	}
 
 	// todo: consider collecting errors a la ValidatedNel
 	/**
 	 * Adds an edge connecting two vertices. 
-	 * Will fail if either the from or to vertices are not present in the graph, or if edge already exists (temp).
+	 * Will fail if either the from or to vertices are not present in the graph.
 	 * 
 	 * @param {Edge} edge
 	 */
 	addEdge(edge) {
+		console.log(edge);
 		if (!this.has(edge.from)) {
-			return new Try(`Vertex: ${edge.from} is not in the graph`, false);
+			throw new Exception(`Vertex: ${edge.from} is not in the graph`);
 		} else if (!this.has(edge.to)) {
-			return new Try(`Vertex: ${edge.to} is not in the graph`, false);
+			throw new Exception(`Vertex: ${edge.to} is not in the graph`);
 		} else {
-			const fromVertex = this.get(edge.from);
-			if (fromVertex.has(edge.to)) {
-				// todo: this will need to be changed to allow multiple edges
-				return new Try(`Edge: ${edge} already exists in the graph`, false); 
-			} else {
-				return new Try(this.set(edge.from, fromVertex.set(edge.to, edge)), true);
-			}
+			return this.set(edge.from, edge);
+			// const fromVertex = this.get(edge.from);
+			// if (fromVertex.has(edge.to)) {
+			// 	// todo: this will need to be changed to allow multiple edges
+			// 	throw new Exception(`Edge: ${edge} already exists in the graph`);
+			// } else {
+			// 	return this.set(edge.from, fromVertex.set(edge.to, edge));
+			// }
 		}
 	}
 

@@ -23,20 +23,18 @@ class Game extends React.Component {
     super(props);
     this.state = {
 
-      network: new Network([]),
+      network: this.populateNetwork(), // todo: implement history
       width: 1000,
       height: 1000,
     }
   }
 
-  createLocation(value) {
-    return new Vertex(value, Math.random() * this.state.width, Math.random() * this.state.height);
+  createLocation(value, width = 1000, height = 1000) {
+    return new Vertex(value, Math.random() * width, Math.random() * height);
   }
 
   // todo: when I do this for real, it'll need a bit more error handling that exits well
   populateNetwork() {
-    console.log(this.state.network)
-
     const a = this.createLocation("a"),
           b = this.createLocation("b"),
           c = this.createLocation("c");
@@ -45,20 +43,12 @@ class Game extends React.Component {
           aToC = new Edge(a, c, 2),
           bToC = new Edge(b, c, 2);
 
-    const addedA = this.state.network.addVertex(a);
-    if (addedA.success) this.setState({network: addedA.value});
-    const addedB = this.state.network.addVertex(b);
-    if (addedB.success) this.setState({network: addedB.value});
-    const addedC = this.state.network.addVertex(c);
-    if (addedC.success) this.setState({network: addedC.value})
-
-    const addedAtoB = this.state.network.addEdge(aToB);
-    if (addedAtoB.success) this.setState({network: addedAtoB.value});
-    const addedAtoC = this.state.network.addEdge(aToC);
-    if (addedAtoC.success) this.setState({network: addedAtoC.value});
-    const addedBtoC = this.state.network.addEdge(bToC);
-    if (addedBtoC.success) this.setState({network: addedBtoC.value});
-
+    try {
+      // console.log((new Network()).addVertex(a))
+      return new Network().addVertex(a).addVertex(b).addVertex(c).addEdge(aToB).addEdge(aToC).addEdge(bToC);
+    } catch(e) {
+      console.log(e);
+    }
 
   }
 
@@ -86,7 +76,6 @@ class Game extends React.Component {
   // }
 
   render() {
-    this.populateNetwork();
     return (
       <table>
         <thead>

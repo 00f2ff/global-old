@@ -11,7 +11,10 @@
  * 
  * value is the value
  * success is a boolean (i.e. whether that value is an error message)
+ * 
+ * @deprecated use errors instead
  */
+
 class Try {
 	constructor(value, success) {
 		this.value = value;
