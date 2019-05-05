@@ -1,8 +1,14 @@
 
 // This will get filled out more in the future
 class Vertex {
+	/**
+	 * 
+	 * @param {*} value An object containing the data used to render a Location
+	 * @param {Number} x     
+	 * @param {Number} y 
+	 */
 	constructor(value, x, y) {
-		this.value = value; // todo: determine if this will be PC/NR stuff, or just location. It at least needs an id
+		this.value = value;
 		this.x = x;
 		this.y = y;
 	}

@@ -1,9 +1,9 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Network from './common/network.js';
 import Vertex from './common/vertex';
 import Edge from './common/edge';
+import Exception from './common/exception';
 
 // function Game() {
 //   return (
@@ -11,8 +11,115 @@ import Edge from './common/edge';
 //   );
 // }
 
+// class Location extends React.Component {
+//   // constructor(props) {
+//   //   super(props);
+
+//   // }
+// }
+
+const gameInit = {
+  width: 1000,
+  height: 1000,
+  // enhancement: each good should have its on quotient; quotient should cut costs or something for NRs
+  demandQuotient: (low = 0.5, high = 2) => { return Math.random() * (high - low) + low; },
+  stationCost: (duration) => { return duration; },
+  // an enumeration of location sizes that corresponds with the number of goods they demand, station size, etc
+  locationSize: Object.freeze({
+    small: {
+      numGoodsDemanded: 1,
+      stationDuration: 20,
+    }, 
+    medium: {
+      numGoodsDemanded: 2,
+      stationDuration: 10,
+    }, 
+    large: {
+      numGoodsDemanded: 3,
+      stationDuration: 5,
+    }
+  }),
+  // todo: increase the flexibility of demand
+  // Keeps track of resource type and base price
+  resources: {
+    steel: {
+      basePrice: 10,
+    }, 
+    oil: {
+      basePrice: 20,
+    }, 
+    aluminum: {
+      basePrice: 30,
+    }
+  },
+  createNaturalResource: (name, size, good) => {
+    const duration = gameInit.locationSize[size][gameInit.stationDuration];
+    let value = { // todo: I think what's in value should be a separate class
+      name: name,
+      type: "NR",
+      size: size,
+      goods: [],
+      stationDuration: duration,
+      stationCost: gameInit.stationCost(duration),
+      demandQuotient: gameInit.demandQuotient(),
+    }
+    if (good) {
+      value.goods.push(good);
+    } else {
+      const resourceKeys = Object.keys(gameInit.resources);
+      const randomKey = resourceKeys[Math.random() * resourceKeys.length];
+      value.goods.push(randomKey);
+    }
+
+    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
+  },
+  createPopulationCenter: (name, size) => {
+    const duration = gameInit.locationSize[size][gameInit.stationDuration];
+    let value = {
+      name: name,
+      type: "PC",
+      size: size,
+      goods: [],
+      stationDuration: duration,
+      stationCost: gameInit.stationCost(duration),
+      demandQuotient: gameInit.demandQuotient(),
+    }
+    let availableResources = gameInit.resources;
+    
+    for (let i; i < gameInit.locationSize[size]["numGoodsDemanded"]; i++) {
+      const resourceKeys = Object.keys(availableResources);
+      const randomKey = resourceKeys[Math.random() * resourceKeys.length];
+      value.goods.push({randomKey: availableResources[randomKey]});
+      delete availableResources[randomKey];
+    }
+
+    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
+  }
+
+
+
+}
+
+class Location extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  // todo: improve keys
+  render() {
+    const value = this.props.vertex.value;
+    return (
+    <div key={value.name}>
+      <div>Name: {value.name}</div>
+      <div>Size: {value.size}</div>
+      {/* <div>Edges: {this.props.edges}</div> */}
+    </div>)
+  }
+}
+
 // todo: I think that PC/NR and vertices need to be the same thing. 
 // figure out how to structure the data that way
+// IMPORTANT: only Game should keep track of state, which I guess means each Location gets a vertex prop
 class Game extends React.Component {
   /**
    * The network initializes mutably, but after that point we keep immutable copies in a history
@@ -22,72 +129,57 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
       network: this.populateNetwork(), // todo: implement history
-      width: 1000,
-      height: 1000,
     }
   }
 
-  createLocation(value, width = 1000, height = 1000) {
-    return new Vertex(value, Math.random() * width, Math.random() * height);
-  }
-
-  // todo: when I do this for real, it'll need a bit more error handling that exits well
   populateNetwork() {
-    const a = this.createLocation("a"),
-          b = this.createLocation("b"),
-          c = this.createLocation("c");
-
-    const aToB = new Edge(a, b, 1),
-          aToC = new Edge(a, c, 2),
-          bToC = new Edge(b, c, 2);
-
     try {
-      // console.log((new Network()).addVertex(a))
-      return new Network().addVertex(a).addVertex(b).addVertex(c).addEdge(aToB).addEdge(aToC).addEdge(bToC);
+      const a = gameInit.createPopulationCenter("a", "small"),
+            b = gameInit.createPopulationCenter("b", "medium"),
+            c = gameInit.createPopulationCenter("c", "large"),
+            d = gameInit.createNaturalResource("d", "small", "steel");
+
+      const aToB = new Edge(a, b, 1),
+            aToC = new Edge(a, c, 2),
+            bToC = new Edge(b, c, 2),
+            cToD = new Edge(c, d, 3);
+
+      return new Network().addVertex(a).addVertex(b).addVertex(c).addVertex(d).addEdge(aToB).addEdge(aToC).addEdge(bToC).addEdge(cToD);
     } catch(e) {
       console.log(e);
     }
 
   }
-
-  // todo: this isn't a great key to use, I think
-  // The ... is a spread operator, which does different things in React and ES6:
-  // React: https://stackoverflow.com/questions/31048953/what-do-these-three-dots-in-react-do
-  // Can be used on props to make them all top-level 
-  // ES6: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
-  // Is var-args
-  // renderTableData() {
-    // return (for (const [k, v] of this.state.network) {
-    //     return (<tr key={k}> 
-    //       <td>{k}</td>
-    //       <td>{v}</td>
-    //     </tr>);
-    //   });
-      
-    // return [...this.state.network].map((entry, index) => { 
-    //   let value = this.state.network.get(entry)
-    //   return (<tr key={index}> 
-    //     <td>{entry}</td>
-    //     <td>{this.state.network.get(entry)}</td>
-    //   </tr>);
-    // });
-  // }
+  
+  renderNetwork(network) {
+    return [...this.state.network].map((entry, index) => {
+      const [vertex, edge] = entry;
+      return <Location vertex={vertex} edges={edge} />
+      // return (<div></div>);
+    });
+    // for (let [k, v] of network) {
+    //   return <Location vertex={k} edges={v} />
+    // }
+    // return <div></div>
+  }
 
   render() {
     return (
-      <table>
-        <thead>
-        <tr>
-          <th>Name</th>
-          <th>Value</th>
-        </tr>
-        </thead>
-        <tbody>
-          {/* {this.renderTableData()} */}
-        </tbody>
-      </table>
+      <div>
+        {this.renderNetwork(this.state.network)}
+      </div>
+      // <table>
+      //   <thead>
+      //   <tr>
+      //     <th>Name</th>
+      //     <th>Value</th>
+      //   </tr>
+      //   </thead>
+      //   <tbody>
+      //     {/* {this.renderTableData()} */}
+      //   </tbody>
+      // </table>
     )
   }
 }
