@@ -1,103 +1,7 @@
 import React from 'react';
 import './App.css';
 import Network from './common/network.js';
-import Vertex from './common/vertex';
-import Edge from './common/edge';
-import Exception from './common/exception';
-
-const gameInit = {
-  width: 1000,
-  height: 1000,
-  // enhancement: each good should have its on quotient; quotient should cut costs or something for NRs
-  demandQuotient: (low = 0.5, high = 2) => { return Math.random() * (high - low) + low; },
-  stationCost: (duration) => { return duration; },
-  // an enumeration of location sizes that corresponds with the number of goods they demand, station size, etc
-  // todo: supported edges should be decoupled from this, however
-  locationSize: Object.freeze({
-    small: {
-      numGoodsDemanded: 1,
-      stationDuration: 20,
-    }, 
-    medium: {
-      numGoodsDemanded: 2,
-      stationDuration: 10,
-    }, 
-    large: {
-      numGoodsDemanded: 3,
-      stationDuration: 5,
-    }
-  }),
-  // todo: increase the flexibility of demand
-  // Keeps track of resource type and base price
-  resources: {
-    steel: {
-      basePrice: 10,
-    }, 
-    oil: {
-      basePrice: 20,
-    }, 
-    aluminum: {
-      basePrice: 30,
-    }
-  },
-  // Implements the modern Fisher-Yates shuffle, selecting `quantity` resources from a randomization of `resources`
-  shuffleResources: (quantity) => {
-    let shuffled = Object.keys(gameInit.resources).slice(); // make a copy
-    let currentIndex = shuffled.length;
-    let tempValue, randomIndex;
-    while (currentIndex > 0) {
-      randomIndex = Math.floor(Math.random() * currentIndex); // Guarantees a value within [0, currentIndex)
-      // Avoid out of bounds
-      currentIndex--;
-      // Swap elements
-      tempValue = shuffled[currentIndex];
-      shuffled[currentIndex] = shuffled[randomIndex];
-      shuffled[randomIndex] = tempValue;
-    }
-    return shuffled.slice(0, quantity);           
-  },
-  // locations capture just the resource key name, not the value itself. This should enable updating from a central
-  // source of truth
-  createNaturalResource: (name, size, good) => {
-    const duration = gameInit.locationSize[size]["stationDuration"];
-    let value = { // todo: I think what's in value should be a separate class
-      name: name,
-      type: "Natural Resource",
-      size: size,
-      goods: [],
-      stationDuration: duration,
-      stationCost: gameInit.stationCost(duration),
-      demandQuotient: gameInit.demandQuotient(),
-    }
-    if (good) {
-      value.goods.push(good);
-    } else {
-      const resourceKeys = Object.keys(gameInit.resources); 
-      // todo: it may even make sense to have resources be its own class, maybe a stateless component
-      const randomKey = resourceKeys[Math.random() * resourceKeys.length];
-      value.goods.push(randomKey);
-    }
-
-    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
-  },
-  createPopulationCenter: (name, size) => {
-    const duration = gameInit.locationSize[size]["stationDuration"];
-    const quantityGoodsDemanded = gameInit.locationSize[size]["numGoodsDemanded"];
-    let value = {
-      name: name,
-      type: "Population Center",
-      size: size,
-      goods: gameInit.shuffleResources(quantityGoodsDemanded),
-      stationDuration: duration,
-      stationCost: gameInit.stationCost(duration),
-      demandQuotient: gameInit.demandQuotient(),
-    }
-    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
-  }
-
-
-
-}
+import gameInit from './gameInit.js'
 
 class Location extends React.Component {
   constructor(props) {
@@ -113,6 +17,13 @@ class Location extends React.Component {
         </tr>
       );
     });
+  }
+
+  printConnections() {
+    return [...this.props.edges.entries()].map((kv, index) => {
+      const [vertex, edges] = kv;
+      return vertex.value.name;
+    }).join(", ");
   }
 
   render() {
@@ -142,7 +53,11 @@ class Location extends React.Component {
             <td>{value.stationCost}</td>
           </tr>
           <tr>
-            <th>Goods {value.type === "Population Center" ? "Demanded" : "Supplied"}</th>
+            <th>Connections</th>
+            <td>{this.printConnections()}</td>
+          </tr>
+          <tr>
+            <th>Goods {value.type === "population-center" ? "Demanded" : "Supplied"}</th>
             <td>{<table>
                 <thead>
                   <tr>
@@ -160,9 +75,6 @@ class Location extends React.Component {
   }
 }
 
-// todo: I think that PC/NR and vertices need to be the same thing. 
-// figure out how to structure the data that way
-// IMPORTANT: only Game should keep track of state, which I guess means each Location gets a vertex prop
 /**
  * State research:
  * "Because this.props and this.state may be updated asynchronously, you should not rely on their values for 
@@ -284,17 +196,26 @@ class Game extends React.Component {
 
   }
   
-  renderNetwork(network) {
+  renderNetwork(network, type) {
     return [...this.state.network].map((entry, index) => {
       const [vertex, edge] = entry;
-      return <Location key={vertex.value.name} vertex={vertex} edges={edge} />
+      if (vertex.value.type === type) {
+        return <Location key={vertex.value.name} vertex={vertex} edges={edge} />
+      }
     });
   }
 
+  // todo: my rendering needs some cleanup
   render() {
     return (
-      <div id="container">
-        {this.renderNetwork(this.state.network)}
+      <div id="container"> 
+        <div className="population-center">
+          {this.renderNetwork(this.state.network, "population-center")}
+        </div>
+        <div className="natural-resource">
+          {this.renderNetwork(this.state.network, "natural-resource")}
+        </div>
+        
       </div>
     )
   }

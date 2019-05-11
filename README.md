@@ -18,19 +18,19 @@ In the short term, this should just save to localStorage.
 
 ## To do:
 ### Map Generation
-1. Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
-1. Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
-1. Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
-  1. Can implement Dijkstra's Algorithm to do so
-	1. Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
-	1. Make sure this goes depth-first
-1. I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
+- [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
+- [ ] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
+- [ ] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
+  - Can implement Dijkstra's Algorithm to do so
+	- Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
+	- Make sure this goes depth-first
+- [ ] I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
 ### Market
-1. 0.0.1/2 are likely already implemented
-1. Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
-1. Research and implement a pseudo-random function that fluctuates demand on a per-PC basis.
-1. Refactor demand function to accept a +/- across all PCs for future global event simulation
-  1. Events may include things like reduction in NR availability (e.g. mining accident) 
+- 0.0.1/2 are likely already implemented
+- [ ] Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
+- [ ] Research and implement a pseudo-random function that fluctuates demand on a per-PC basis.
+- [ ] Refactor demand function to accept a +/- across all PCs for future global event simulation
+  - Events may include things like reduction in NR availability (e.g. mining accident) 
 ### Gameplay -- use redux for interactivity and state
 Ideas:
 - When a PC gets too much of a resource, that depresses how much it's willing to pay
@@ -88,7 +88,7 @@ Notes from Scala:
   0.0.5 rail: 0.0.4 + There should not be full connectivity, so some restrictions need to be placed to make sure not all
   PCs connect. I think
   parallel edges should still be a proximity function, so think about geometries in which smaller PCs can be added to a
-  route rather than passed by (e.g. length <= 1.2 of original length to include). This could increase the number of edges
+  route rather than passed by (e.g. length <= - [x]2 of original length to include). This could increase the number of edges
   to a PC beyond its city size, which is fine.
    */
 
