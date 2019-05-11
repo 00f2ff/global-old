@@ -16,6 +16,145 @@ Example algorithms are as follows:
 In the short term, this should just save to localStorage. 
 
 
+## To do:
+###Debugging
+1. Debug PC demand problem
+###Map Generation
+1. Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC
+1. Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
+1. Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
+  1. Can implement Dijkstra's Algorithm to do so
+	1. Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
+	1. Make sure this goes depth-first
+1. I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
+###Market
+1. 0.0.1/2 are likely already implemented
+1. Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
+1. Research and implement a pseudo-random function that fluctuates demand on a per-PC basis.
+1. Refactor demand function to accept a +/- across all PCs for future global event simulation
+  1. Events may include things like reduction in NR availability (e.g. mining accident) 
+###Gameplay -- use redux for interactivity and state
+Ideas:
+- When a PC gets too much of a resource, that depresses how much it's willing to pay
+- Implement Freight Forwarders first
+ - For starters, assume infinite supply/demand quantity, limit of one train per edge
+ - Goods will travel via setTimeout, though I may want to inject routes into a global setInterval that performs checks
+ - First NR-PC routes, but later multi-location routing driven by Dijktra's
+- PC size boosting as more goods flow through it
+- Add more resource types and prices
+- Introduce space-constrained trains 
+  - Measure quantity of goods according to how many containers they fill on a train car
+- Size-constrained railway depots + ability for PCs to build more infrastructure
+- Visualize the graph
+- Players can petition government to purchase rail between two locations that are not directly connected
+- Design a compelling UI
+- Consider changing how NR edges are determined (i.e. if size is medium, both edges may go to a single PC)
+- Consider relaxing map generation algorithm to give slight distance handicap when considering a connection to a small PC
+- Implement carriers
+	- Enhanced train logic, such as newer / more locomotives and customization of trains
+- Introduce events that affect how long it takes for a train to reach a destination, or if a station takes longer for loading / unloading
+	- E.g. if there's a machinery breakdown, a PC's load time may double; if there's a strike and a sentiment check on the PC makes it sound like it will go on for a while, freight forwarders can route through different PCs
+- Corporate research
+ - Efficiency gains are clearer for carriers (faster trains, improved refridgeration, etc)
+ - Locations (so government research) could benefit from improved switching
+ - Carriers could improve load/unload technology for faster turnaround
+ - More advanced financial modeling provided for player (kind of like a mini Bloomberg terminal)
+ - Automated routing of varying degrees of usefulness
+- Enhanced visualization for players to see which routes are revenue/profit-generating, and which aren't
+- Add full container load (FCL) and less-than container load (LCL) rate options for freight forwarders
+- Implement bonds and loans
+ - Bonds could be low-interest and issued by individual PCs, and come with expectation that a certain amount of CapEx will be dedicated toward enhancing presence in that PC
+ - Loans could be mid-to-high-interest and issued by banks, and come with geographic flexibility
+- Multiple trains per edge (this requires advanced routing)
+ - e.g. perhaps a track has a switch implemented in the middle of a route (case of fast/slow train, or trains heading toward one another). If this happens, potentially in the future a small PC could crop up there
+
+Notes from Scala:
+/*
+  Multiple edges into a PC are considered as heading into a single depot.
+
+  Edge creation:
+   - I'll need a length function at some point. Initially it will just be linear, though at some point it needs to capture
+     geographic features, and I need to decide whether any curve tolerances will be introduced
+   - I'm going to want a graph visualization tool to make sure this is working (visual checking will be easier than with code,
+     though test code should be present too). A static cytoscape encoding is probably worth it (use what we are in runtime for
+     work)
+
+  0.0.1 rail: size of PC tracks with how many edges it has. Resources picked are random, but 1 per edge
+  so no duplicates yet
+  0.0.2 rail: number of edges to a PC is a proximity function, but is limited by size. Not necessarily 1 per edge, nor
+  random picking
+  0.0.3 rail: edges are a proximity function, with a depth-first approach to connecting PCs together, based on demand.
+              Update: what does this mean? Presumably PCs are connected together, but is that based on closer resources?
+  0.0.4 rail: 0.0.3 + size indicating parallel edges to other PCs in all instances (removing disjoint nodes).
+  0.0.5 rail: 0.0.4 + There should not be full connectivity, so some restrictions need to be placed to make sure not all
+  PCs connect. I think
+  parallel edges should still be a proximity function, so think about geometries in which smaller PCs can be added to a
+  route rather than passed by (e.g. length <= 1.2 of original length to include). This could increase the number of edges
+  to a PC beyond its city size, which is fine.
+   */
+
+  /*
+  Once the initialized map is in a good spot, it will be time to create the market. I think PCs themselves shouldn't
+  store market data, but rather a potentially mutating object does for each PC and resource.
+  Market 0.0.1: If this design holds, an object leveraged in a game loop that changes demand pricing for each PC by randomly
+  selecting with a Vector. This requires a change to Global to include a main() method
+  Market 0.0.2: Establish a value for each resource, and change demand pricing to be along a quotient axis to establish rate
+  Market 0.0.3: Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
+  Market 0.0.4: Research and implement a randomized function that fluctuates demand on a per-PC basis.
+  Market 0.0.5: Refactor demand function to accept a +/- across all PCs for future global event simulation
+
+  thought:
+   - consider introducing a tiling system that will change demand for all PCs within a tile
+   - Market 0.0.4+ might make sense to write in JavaScript, and to introduce live charts for demand in different PCs.
+     It's conceivable that at this point in time I'll need to switch to design and development of the frontend. I think
+     React is still the way to go, I'll just need to deal with the learning curve
+ */
+
+ // todo: in refactor, Route should support multiple transportation sources, e.g. a railway can have multiple trains on it,
+// and a road multiple trucks, and a sea route multiple ships
+// What matters is that there is rail capacity at the other end to offload trains such that there are not conflicts, and
+// that the lengthwise capacity also supports the trains (e.g. if 2 100 foot trains arrive and there's only 50 feet of
+// side rail, the second one will be stuck
+// At present time, routes are assumed to be straight lines. In future, geography may require pathfinding algorithms that
+// can do things like wrap railways and highways
+
+Random thoughts:
+- I'm curious whether a k-d tree would be useful to evaluate different pathfinding options
+- Look into Cytoscape.js for frontend vis. It shouldn't be interactive per se, but may be worth using for graph visualization
+  - That said, perhaps when actors can add infrastructure, an interactive graph can be used to establish the best placement
+    with updating variables
+
+Visualization engine
+- I think a customized SVG engine may be the way to go. Cytoscape might be ok, but the background is contextually relevant,
+  and needs to impact how the vertices appear visually. The tool is not designed for that. SVG on the other hand, can
+  support custom line art and fills, which will be useful and referenceable
+- Something to consider (likely too advanced, but I also don't know how to create topology maps and I want to keep this 2D)
+  https://www.reddit.com/r/proceduralgeneration/comments/99028e/island_generation_process_video/
+  This is a little more informative: http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
+  Another: https://heredragonsabound.blogspot.com/2016/10/making-islands.html
+  Look into continent builders, and figure out scale factors (i.e. how far away things are) in a consistent manner
+  When I introduce sea and air routes, continents that historically would be choked of resources can demand them from other
+  places.
+  This is a goldmine as well for tutorials https://www.redblobgames.com/
+  I'm interested what he means by "annotate". I might mean weighting edges in a graph differently to suggest something like
+  change in elevation, which I could use to indicate things like port depth, oceans, mountains and plains
+  This tutorial has a last section on all the different game things that can be represented with graphs, and therefore use
+  graph algos: https://www.redblobgames.com/pathfinding/grids/graphs.html it's super useful and interesting to think about!
+
+
+  https://www.redblobgames.com/pathfinding/grids/graphs.html
+
+	* todo: there are a lot of enhancements we can do when we refactor. For instance, a train could consist of multiple
+    * cars encapsulated by a list, and there may be more than one locomotive
+
+  /*
+The value of Goods may not matter. However, different carriers/forwarders could charge different rates based on a good,
+or a flat rate, so perhaps that option should be left open.
+
+Similarly, there are considerations about full container load (FCL) and less-than container load (LCL) rates
+ */
+
+ todo: add refinements to oil and steel (and aluminum if necessary)
 
 
 
