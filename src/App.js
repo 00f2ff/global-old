@@ -39,6 +39,24 @@ const gameInit = {
       basePrice: 30,
     }
   },
+  // Implements the modern Fisher-Yates shuffle, selecting `quantity` resources from a randomization of `resources`
+  shuffleResources: (quantity) => {
+    let shuffled = Object.keys(gameInit.resources).slice(); // make a copy
+    let currentIndex = shuffled.length;
+    let tempValue, randomIndex;
+    while (currentIndex > 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex); // Guarantees a value within [0, currentIndex)
+      // Avoid out of bounds
+      currentIndex --;
+      // Swap elements
+      tempValue = shuffled[currentIndex];
+      shuffled[currentIndex] = shuffled[randomIndex];
+      shuffled[randomIndex] = tempValue;
+    }
+    return shuffled.slice(0, quantity);           
+  },
+  // locations capture just the resource key name, not the value itself. This should enable updating from a central
+  // source of truth
   createNaturalResource: (name, size, good) => {
     const duration = gameInit.locationSize[size]["stationDuration"];
     let value = { // todo: I think what's in value should be a separate class
@@ -53,7 +71,8 @@ const gameInit = {
     if (good) {
       value.goods.push(good);
     } else {
-      const resourceKeys = Object.keys(gameInit.resources);
+      const resourceKeys = Object.keys(gameInit.resources); 
+      // todo: it may even make sense to have resources be its own class, maybe a stateless component
       const randomKey = resourceKeys[Math.random() * resourceKeys.length];
       value.goods.push(randomKey);
     }
@@ -62,30 +81,16 @@ const gameInit = {
   },
   createPopulationCenter: (name, size) => {
     const duration = gameInit.locationSize[size]["stationDuration"];
+    const quantityGoodsDemanded = gameInit.locationSize[size]["numGoodsDemanded"];
     let value = {
       name: name,
       type: "Population Center",
       size: size,
-      goods: [],
+      goods: gameInit.shuffleResources(quantityGoodsDemanded),
       stationDuration: duration,
       stationCost: gameInit.stationCost(duration),
       demandQuotient: gameInit.demandQuotient(),
     }
-    let availableResources = gameInit.resources;
-    console.log(value)
-
-    let quantityGoodsDemanded = gameInit.locationSize[size]["numGoodsDemanded"];
-    console.log(quantityGoodsDemanded)
-    for (let i; i < quantityGoodsDemanded; i++) {
-    // while (quantityGoodsDemanded > 0) {
-      let resourceKeys = Object.keys(availableResources);
-      let randomKey = resourceKeys[Math.random() * resourceKeys.length];
-      value.goods.push({randomKey: availableResources[randomKey]});
-      delete availableResources[randomKey];
-      quantityGoodsDemanded -= 1;
-    }
-    console.log(value.goods)
-
     return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
   }
 
@@ -99,12 +104,13 @@ class Location extends React.Component {
   }
 
   renderGoods() {
+    console.log(gameInit.shuffleResources(2))
+    console.log(this.props.vertex.value.goods);
     return this.props.vertex.value.goods.map((good, index) => {
-      // leverage unary plus just in case of accidental string: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Arithmetic_Operators#Unary_plus
       return (
         <tr>
           <td>{good}</td>
-          <td>{+(gameInit.resources[good]["basePrice"] * this.props.vertex.value.demandQuotient).toFixed(2)}</td>
+          <td>{(gameInit.resources[good]["basePrice"] * this.props.vertex.value.demandQuotient).toFixed(2)}</td>
         </tr>
       );
     });
