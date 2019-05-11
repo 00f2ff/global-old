@@ -37,6 +37,10 @@ code {
   grid-column: col-start 7 / span 12;
 }
 
+h2 {
+  text-align: center;
+}
+
 th {
   text-align: left;
 }

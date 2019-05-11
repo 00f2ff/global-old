@@ -122,7 +122,6 @@ class Game extends React.Component {
    */
 
 
-  // todo: print edges out in the cards, and make separate columns for PC/NR
   populateNetwork() {
     // todo: these should be variables elsewhere
     // Dictate how many of each size PC will be initialized
@@ -133,10 +132,10 @@ class Game extends React.Component {
     };
     // Dictate how many of each NR will be initialized and at what size
     // todo: later, consider changing how many of each resource _type_ is initialized
-    let NRSettings = {
-      small: 1,
-      medium: 1,
-      large: 1
+    let NRSettings = { // todo: when this is sparse, the initialization (non-Dijkstra) sometimes fails
+      small: 3,
+      medium: 3,
+      large: 3
     };
     try {
       let network = new Network();
@@ -177,15 +176,29 @@ class Game extends React.Component {
         // todo: for the time being we're going to say you can't have more edges than initialized goods
         return edgeCount === gameInit.locationSize[vertex.value.size]["numGoodsDemanded"]
       }
+
+      function distance(v1, v2) {
+        return Math.hypot(v1.x - v2.x, v1.y - v2.y)
+      }
+
+      function findClosestNR(network, pc, good) {
+        // Match only on NRs that have the correct good and are not already at edge capacity
+        let matchesGood = NRs.filter(x => x.value.goods[0] === good && !atEdgeCapacity(network, x));
+        let closest = [];
+        for (let nr of matchesGood) {
+          const dist = distance(pc, nr);
+          if (closest.length === 0 || dist < closest[1]) {
+            closest = [nr, dist];
+          }
+        }
+        return closest[0];
+      }
+
       // Create edges
       for (let pc of PCs) {
         for (let good of pc.value.goods) {
-          for (let nr of NRs) {
-            if (nr.value.goods[0] === good && !atEdgeCapacity(network, nr)) {
-              network.addEdge(pc, nr, weight);
-              break;
-            }
-          }
+          const closestNR = findClosestNR(network, pc, good);
+          network.addEdge(pc, closestNR, weight);
         }
       }
 
@@ -210,9 +223,11 @@ class Game extends React.Component {
     return (
       <div id="container"> 
         <div className="population-center">
+          <h2>Population Centers</h2>
           {this.renderNetwork(this.state.network, "population-center")}
         </div>
         <div className="natural-resource">
+          <h2>Natural Resources</h2>
           {this.renderNetwork(this.state.network, "natural-resource")}
         </div>
         

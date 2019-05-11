@@ -19,7 +19,7 @@ In the short term, this should just save to localStorage.
 ## To do:
 ### Map Generation
 - [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
-- [ ] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
+- [x] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
 - [ ] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
   - Can implement Dijkstra's Algorithm to do so
 	- Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
