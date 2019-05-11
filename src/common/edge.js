@@ -11,7 +11,7 @@ class Edge {
 		this.from = from;
 		this.to = to;
 		this.value = value;
-		this.distance = Math.hypot(from.x - to.x, from.y - to.y);
+		this.distance = Math.hypot(from.x - to.x, from.y - to.y); // this can become a function if we stop capturing "from"
 	}
 }
 

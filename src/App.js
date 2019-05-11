@@ -12,6 +12,7 @@ const gameInit = {
   demandQuotient: (low = 0.5, high = 2) => { return Math.random() * (high - low) + low; },
   stationCost: (duration) => { return duration; },
   // an enumeration of location sizes that corresponds with the number of goods they demand, station size, etc
+  // todo: supported edges should be decoupled from this, however
   locationSize: Object.freeze({
     small: {
       numGoodsDemanded: 1,
@@ -47,7 +48,7 @@ const gameInit = {
     while (currentIndex > 0) {
       randomIndex = Math.floor(Math.random() * currentIndex); // Guarantees a value within [0, currentIndex)
       // Avoid out of bounds
-      currentIndex --;
+      currentIndex--;
       // Swap elements
       tempValue = shuffled[currentIndex];
       shuffled[currentIndex] = shuffled[randomIndex];
@@ -104,8 +105,6 @@ class Location extends React.Component {
   }
 
   renderGoods() {
-    console.log(gameInit.shuffleResources(2))
-    console.log(this.props.vertex.value.goods);
     return this.props.vertex.value.goods.map((good, index) => {
       return (
         <tr>
@@ -210,20 +209,75 @@ class Game extends React.Component {
   }
    */
 
-  // todo: full-scale port of location/edge generation (see Scala notes)
+
+  // todo: print edges out in the cards, and make separate columns for PC/NR
   populateNetwork() {
+    // todo: these should be variables elsewhere
+    // Dictate how many of each size PC will be initialized
+    let PCSettings = {
+      small: 3,
+      medium: 3,
+      large: 3
+    };
+    // Dictate how many of each NR will be initialized and at what size
+    // todo: later, consider changing how many of each resource _type_ is initialized
+    let NRSettings = {
+      small: 1,
+      medium: 1,
+      large: 1
+    };
     try {
-      const a = gameInit.createPopulationCenter("a", "small"),
-            b = gameInit.createPopulationCenter("b", "medium"),
-            c = gameInit.createPopulationCenter("c", "large"),
-            d = gameInit.createNaturalResource("d", "small", "steel");
+      let network = new Network();
+      // Initialize PCs
+      let PCs = [];
+      for (let size in PCSettings) {
+        let count = PCSettings[size]
+        while (count > 0) {
+          PCs.push(gameInit.createPopulationCenter(`${size}-PC-${count}`, size));
+          count--;
+        }
+      }
+      // Initialize NRs
+      let NRs = [];
+      for (let size in NRSettings) {
+        let count = NRSettings[size];
+        for (let resource of Object.keys(gameInit.resources)) {
+          let thisResourceCount = count;
+          while (thisResourceCount > 0) {
+            NRs.push(gameInit.createNaturalResource(`${size}-${resource}-${thisResourceCount}`, size, resource));
+            thisResourceCount--;
+          }
+        }
+      }
+      // Add vertices
+      for (let v of PCs.concat(NRs)) {
+        network.addVertex(v);
+      }
 
-      const aToB = new Edge(a, b, 1),
-            aToC = new Edge(a, c, 2),
-            bToC = new Edge(b, c, 2),
-            cToD = new Edge(c, d, 3);
+      const weight = undefined; // This is a placeholder for adding arbitrary weights to edges
 
-      return new Network().addVertex(a).addVertex(b).addVertex(c).addVertex(d).addEdge(aToB).addEdge(aToC).addEdge(bToC).addEdge(cToD);
+      // Checks whether a vertex cannot support any more edges
+      function atEdgeCapacity(network, vertex) {
+        const edgeCountReducer = (accumulator, edges) => accumulator + edges.length
+        const vertexEdgeArrays = Array.from(network.get(vertex).values());
+        const edgeCount = vertexEdgeArrays.reduce(edgeCountReducer, 0);
+
+        // todo: for the time being we're going to say you can't have more edges than initialized goods
+        return edgeCount === gameInit.locationSize[vertex.value.size]["numGoodsDemanded"]
+      }
+      // Create edges
+      for (let pc of PCs) {
+        for (let good of pc.value.goods) {
+          for (let nr of NRs) {
+            if (nr.value.goods[0] === good && !atEdgeCapacity(network, nr)) {
+              network.addEdge(pc, nr, weight);
+              break;
+            }
+          }
+        }
+      }
+
+      return network;
     } catch(e) {
       console.log(e);
     }

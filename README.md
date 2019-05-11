@@ -17,10 +17,8 @@ In the short term, this should just save to localStorage.
 
 
 ## To do:
-### Debugging
-1. Debug PC demand problem
 ### Map Generation
-1. Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC
+1. Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
 1. Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
 1. Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
   1. Can implement Dijkstra's Algorithm to do so
@@ -36,6 +34,7 @@ In the short term, this should just save to localStorage.
 ### Gameplay -- use redux for interactivity and state
 Ideas:
 - When a PC gets too much of a resource, that depresses how much it's willing to pay
+- Add proper naming to things (randomized, but have it make sense)
 - Implement Freight Forwarders first
  - For starters, assume infinite supply/demand quantity, limit of one train per edge
  - Goods will travel via setTimeout, though I may want to inject routes into a global setInterval that performs checks
