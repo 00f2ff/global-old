@@ -50,32 +50,25 @@ class Network extends Map {
 	 * @param {Vertex} v2
 	 * @param {*} weight
 	 */
-	// todo: when an edge is added, it's added as a from-to _and_ to-from
 	addEdge(v1, v2, weight) {
 		if (!this.has(v1)) {
 			throw new Exception(`Vertex: ${v1.value.name} is not in the graph`);
 		} else if (!this.has(v2)) {
 			throw new Exception(`Vertex: ${v2.value.name} is not in the graph`);
 		} else {
-			let v1Map = this.get(v1); 
-			let v2Map = this.get(v2);
+			const addSingleEdge = (from, to) => {
+				let map = this.get(from);
+				if (map.has(to)) {
+					map = map.set(to, map.get(to).push(new Edge(from, to, weight)));
+				} else {
+					map = map.set(to, [new Edge(from, to, weight)]);
+				}
+				return map;
+			}
 
-			if (v1Map.has(v2)) { // todo: refactor as a helper
-				v1Map = v1Map.set(v2, v1Map.get(v2).push(new Edge(v1, v2, weight)));
-			} else {
-				v1Map = v1Map.set(v2, [new Edge(v1, v2, weight)]);
-			}
-			if (v2Map.has(v1)) {
-				v2Map = v2Map.set(v1, v2Map.get(v1).push(new Edge(v2, v1, weight)));
-			} else {
-				v2Map = v2Map.set(v1, [new Edge(v2, v1, weight)]);
-			}
-			return this.set(v1, v1Map).set(v2, v2Map);
+			return this.set(v1, addSingleEdge(v1, v2)).set(v2, addSingleEdge(v2, v1));
 		}
 	}
-
-
-
 
 }
 

@@ -16,6 +16,9 @@ Example algorithms are as follows:
 In the short term, this should just save to localStorage. 
 
 Enhancement to padding in point-setting: create buffers around locations that can't have other points be dropped in. I bet I can find some algorithm that fills available space minus existing areas.
+I think this is what bounding box collision detection is.
+Check the canvas library I'm using to see if it uses a centerpoint or a top-left
+https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection 
 
 ## To do:
 1. Make a copy of the network as-is
@@ -52,6 +55,7 @@ Ideas:
  - First NR-PC routes, but later multi-location routing driven by Dijktra's
 - PC size boosting as more goods flow through it
 - Add more resource types and prices
+  - Also manufacturing, so resources to one PC will cause PC to produce a different kind of resource
 - Introduce space-constrained trains 
   - Measure quantity of goods according to how many containers they fill on a train car
 - Size-constrained railway depots + ability for PCs to build more infrastructure
