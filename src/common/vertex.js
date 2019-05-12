@@ -12,6 +12,15 @@ class Vertex {
 		this.x = x;
 		this.y = y;
 	}
+
+	/**
+	 * Find the distance to another vertex
+	 * 
+	 * @param {Vertex} v 
+	 */
+	distanceTo(v) {
+		return Math.hypot(this.x - v.x, this.y - v.y)
+	}
 }
 
 export default Vertex;

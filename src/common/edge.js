@@ -1,17 +1,13 @@
 
 class Edge {
 	/**
-	 * Since the graph is bidirectional, "from" and "to" don't mean much.
+	 * Captures a weight for an edge between two vertices.
+	 * Doesn't store which vertices it refers to since that can be deduced by walking the Network
 	 * 
-	 * @param {*} value In the future this will track things like type of route
-	 * @param {Vertex} v1  Vertex
-	 * @param {Vertex} v2    Vertex
+	 * @param {*} weight Currently just stores distance, but in the future this will track things like type of route
 	 */
-	constructor(v1, v2, value) {
-		this.v1 = v1;
-		this.v2 = v2;
-		this.value = value;
-		this.distance = Math.hypot(v1.x - v2.x, v1.y - v2.y); // this can become a function if we stop capturing "from"
+	constructor(weight) {
+		this.weight = weight;
 	}
 }
 

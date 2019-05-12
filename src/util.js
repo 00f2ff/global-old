@@ -166,8 +166,6 @@ export const populateNetwork = () => {
       network.addVertex(v);
     }
 
-    const weight = undefined; // This is a placeholder for adding arbitrary weights to edges
-
     // Checks whether a vertex cannot support any more edges
     const atEdgeCapacity = (network, vertex) => {
       const edgeCountReducer = (accumulator, edges) => accumulator + edges.length
@@ -199,7 +197,7 @@ export const populateNetwork = () => {
     for (let pc of PCs) {
       for (let good of pc.value.goods) {
         const closestNR = findClosestNR(network, pc, good);
-        network.addEdge(pc, closestNR, weight);
+        network.addEdge(pc, closestNR, pc.distanceTo(closestNR));
       }
     }
 

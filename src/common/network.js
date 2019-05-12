@@ -59,9 +59,9 @@ class Network extends Map {
 			const addSingleEdge = (from, to) => {
 				let map = this.get(from);
 				if (map.has(to)) {
-					map = map.set(to, map.get(to).push(new Edge(from, to, weight)));
+					map = map.set(to, map.get(to).push(new Edge(weight)));
 				} else {
-					map = map.set(to, [new Edge(from, to, weight)]);
+					map = map.set(to, [new Edge(weight)]);
 				}
 				return map;
 			}
