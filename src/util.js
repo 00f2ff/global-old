@@ -176,23 +176,19 @@ export const populateNetwork = () => {
       return edgeCount === locationSize[vertex.value.size]["numGoodsDemanded"]
     }
 
-    const distance = (v1, v2) => {
-      return Math.hypot(v1.x - v2.x, v1.y - v2.y)
-    }
-
     const findClosestNR = (network, pc, good) => {
       // Match only on NRs that have the correct good and are not already at edge capacity
       let matchesGood = NRs.filter(x => x.value.goods[0] === good && !atEdgeCapacity(network, x));
       let closest = [];
       for (let nr of matchesGood) {
-        const dist = distance(pc, nr);
+        const dist = pc.distanceTo(nr);
         if (closest.length === 0 || dist < closest[1]) {
           closest = [nr, dist];
         }
       }
       return closest[0];
     }
-
+    
     // Create edges
     for (let pc of PCs) {
       for (let good of pc.value.goods) {
@@ -213,7 +209,114 @@ export const populateNetwork = () => {
       return networkCopy;
     }
 
-    return prune(network);
+    /////////////// Shortest-path starts here
+    let networkCopy = prune(network);
+    // Add edges (exceeding size limits) that connect every PC to every other PC
+    for (let pc1 of PCs) {
+      for (let pc2 of PCs) {
+        if (pc1 !== pc2) {
+          networkCopy.addEdge(pc1, pc2, pc1.distanceTo(pc2));
+        }
+      }
+    }
+
+    // Dijkstra stuff
+    // Todo: update this to use Map so vertices themselves can be identified
+    const closestVertex = (distances, visited) => {
+      return Array.from(distances.entries()).reduce((lowest, kv) => {
+        const [vertex, distance] = kv;
+        if ((lowest === null || distance < distances.get(lowest)) && !visited.includes(vertex)) {
+          lowest = vertex;
+        }
+        return lowest;
+      }, null);
+    };
+
+    const flattenEdges = (network, vertex) => {
+      return Array.from(network.get(vertex).entries()).reduce((newMap, [key, value]) => {
+        return newMap.set(key, value[0].weight);
+      }, new Map());
+    }
+
+    // Will this algorithm work given that NRs don't have other connections?
+
+    // call this for each PC toward each NR that matches a demanded good of the PC
+
+    // Adapted from https://hackernoon.com/how-to-implement-dijkstras-algorithm-in-javascript-abdfd1702d04
+    // with adjustment for adjacency Map implementation
+    // todo: there's a bug in here in which the closest vertex sometimes starts as the target (i.e. no hops)
+    // in which case the function will just return with the path and a distance of Infinity. 
+    // I think I can just check for that for the time being though
+    const dijkstra = (network, source, target) => {
+      const distances = flattenEdges(network, source).set(target, Infinity);
+
+      const parents = Array.from(network.get(source).entries()).reduce((m, [key, value]) => { // used to track path history
+        if (key !== target) {
+          return m.set(key, source);
+        } else {
+          return m;
+        }
+      }, new Map([[target, null]])); 
+
+      const visited = [];
+
+      let vertex = closestVertex(distances, visited);
+      while (vertex) {
+        let distance = distances.get(vertex);
+        let children = flattenEdges(network, vertex);
+        for (let kv of children) {
+          const [v, e] = kv;
+          if (v !== source) { // avoid cycles
+            let newDistance = distance + e;
+            if (!distances.has(v) || distances.get(v) > newDistance) {
+              distances.set(v, newDistance);
+              parents.set(v, vertex);
+            }
+          }
+        }
+        visited.push(vertex);
+        vertex = closestVertex(distances, visited);
+      }
+
+      let optimalPath = [target];
+      let parent = parents.get(target);
+      while (parent) {
+        optimalPath.push(parent);
+        parent = parents.get(parent);
+      }
+      
+      optimalPath.reverse();  // reverse array to get correct order
+      const results = {
+        distance: distances.get(target),
+        path: optimalPath
+      };
+      return results;
+    };
+
+    const remainingNRs = Array.from(network.entries()).filter(kv => kv[0].value.type === "natural-resource")
+
+    // let viableNRs = remainingNRs.filter(x => x[0].value.goods[0] === PCs[0].value.goods[0])
+    // let optimalResults = [dijkstra(networkCopy, PCs[0], viableNRs[0][0])];
+    // for (let pc of PCs) {
+      let pc = PCs[0];
+      let good = pc.value.goods[0];
+      let optimalResults = [];
+      // for (let good of pc.value.goods) {
+        let viableNRs = remainingNRs.filter(x => x[0].value.goods[0] === good)
+        let viablePaths = viableNRs.map(x => dijkstra(networkCopy, pc, x[0])); // need vertex itself
+        let optimalResult;
+        for (let result of viablePaths) {
+          if (!optimalResult || result.distance < optimalResult.distance) {
+            optimalResult = result;
+          }
+        }
+        // optimalResults.push(optimalResult);
+      // }
+    // }
+    console.log(PCs[0], optimalResult, networkCopy.get(PCs[0]))
+
+    // return prune(network);
+    return networkCopy;
   } catch(e) {
     console.log(e);
   }

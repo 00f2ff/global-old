@@ -20,11 +20,16 @@ I think this is what bounding box collision detection is.
 Check the canvas library I'm using to see if it uses a centerpoint or a top-left
 https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection 
 
+there may be an enhancement for path-finding that connects every NR to a particular PC that wants it, and then prunes
+
+algo practice: study how Dijkstra's works. I think I have the gist of it, but putting it into practice is tricky
+
 ## To do:
 1. Make a copy of the network as-is
 2. Add edges (exceeding size limits) that connect every PC to every other PC
 3. Find the shortest-path tree where each root node is a PC and it's seeking out matching resources
  - This uses Dijkstra's
+ - ... I may not need a shortest-path tree; I may just get to use Dijkstra's and then filter on the result
 4. Compare the edges found in the as-is network with the paths calculated by the shortest-path tree
  - If any multi-hop paths sum to a distance smaller than a PC's direct edge with a NR, prune the original edge and 
    replace with the edges comprising that path

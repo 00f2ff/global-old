@@ -159,15 +159,17 @@ class Game extends React.Component {
    */
 
   renderEdges() {
-    return [...this.state.network].map((entry, index) => {
+    let allEdges = [];
+    [...this.state.network].map((entry, index) => {
       const [vertex, edges] = entry;
       // first render edges (note: this will result in twice-drawn edges because of undirected nature)
       // todo: when I clean up how edges are created, this should draw every edge, just just the vertex-vertex
       for (let edge of edges) {
         const to = edge[0];
-        return <Route key={`${vertex.value.name} to ${to.value.name}`} v1={vertex} v2={to} />
+        allEdges.push(<Route key={`${vertex.value.name} to ${to.value.name}`} v1={vertex} v2={to} />);
       }
     });
+    return allEdges;
   }
   
   renderNetwork() {

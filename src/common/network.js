@@ -59,16 +59,25 @@ class Network extends Map {
 			const addSingleEdge = (from, to) => {
 				let map = this.get(from);
 				if (map.has(to)) {
-					map = map.set(to, map.get(to).push(new Edge(weight)));
+					let arr = map.get(to)
+					arr.push(new Edge(weight)) // setting this in one step returns the array size, not value
+					map.set(to, arr); 
 				} else {
-					map = map.set(to, [new Edge(weight)]);
+					map.set(to, [new Edge(weight)]);
 				}
 				return map;
 			}
 
-			return this.set(v1, addSingleEdge(v1, v2)).set(v2, addSingleEdge(v2, v1));
+			let a = this.set(v1, addSingleEdge(v1, v2)).set(v2, addSingleEdge(v2, v1));
+			// console.log(a);
+			return a;
 		}
 	}
+
+	// collectEdges() {
+	// 	let edges = [];
+
+	// }
 
 }
 
