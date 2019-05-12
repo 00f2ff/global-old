@@ -2,6 +2,8 @@ import React from 'react';
 import './App.css';
 import Network from './common/network.js';
 import gameInit from './gameInit.js'
+import { Stage, Layer, Rect, Text, Circle, Line } from 'react-konva';
+import Konva from 'konva';
 
 class Location extends React.Component {
   constructor(props) {
@@ -72,6 +74,42 @@ class Location extends React.Component {
         </tbody>
       </table>
     </div>)
+  }
+}
+
+class LocationNode extends React.Component {
+
+  dimensions() {
+    let scalar = gameInit.locationSize[this.props.vertex.value.size]["numGoodsDemanded"];
+    return 10 * scalar;
+  }
+
+  render() {
+    let dim = this.dimensions();
+    return (
+      <Circle
+        x={this.props.vertex.x}
+        y={this.props.vertex.y}
+        width={dim}
+        height={dim}
+        fill={this.props.color}
+      />
+    );
+  }
+}
+
+class Route extends React.Component {
+
+  render() {
+    const v1 = this.props.v1, 
+          v2 = this.props.v2;
+    return(
+      <Line 
+      points={[v1.x, v1.y, v2.x, v2.y]}
+      stroke="red"
+      strokeWidth={2}
+      />
+    )
   }
 }
 
@@ -202,37 +240,90 @@ class Game extends React.Component {
         }
       }
 
-      return network;
+      // Prune vertices that have no edges
+      function prune(network) {
+        let networkCopy = network;
+        console.log(Array.from(network.entries()))
+        for (let kv of Array.from(network.entries())) {
+          const [key, value] = kv;
+          if (value.size === 0) {
+            networkCopy.delete(key);
+          }
+        }
+        return networkCopy;
+      }
+
+      return prune(network);
     } catch(e) {
       console.log(e);
     }
 
   }
-  
-  renderNetwork(network, type) {
+
+  renderEdges() {
     return [...this.state.network].map((entry, index) => {
-      const [vertex, edge] = entry;
-      if (vertex.value.type === type) {
-        return <Location key={vertex.value.name} vertex={vertex} edges={edge} />
+      const [vertex, edges] = entry;
+      // first render edges (note: this will result in twice-drawn edges because of undirected nature)
+      // todo: when I clean up how edges are created, this should draw every edge, just just the vertex-vertex
+      for (let edge of edges) {
+        const to = edge[0];
+        return <Route key={`${vertex.value.name} to ${to.value.name}`} v1={vertex} v2={to} />
       }
+    });
+  }
+  
+  renderNetwork() {
+    return [...this.state.network].map((entry, index) => {
+      const [vertex, edges] = entry;
+      // first render edges (note: this will result in twice-drawn edges because of undirected nature)
+      // todo: when I clean up how edges are created, this should draw every edge, just just the vertex-vertex
+      // for (let edge of edges) {
+      //   const to = edge[0];
+      //   return <Route key={`${vertex.value.name} to ${to.value.name}`} v1={vertex} v2={to} />
+      // }
+
+
+      // Then render vertices
+      let color;
+      if (vertex.value.type === "population-center") {
+        color = "green";
+      } else {
+        color = "blue";
+      }
+      // if (vertex.value.type === type) {
+        // return <Location key={vertex.value.name} vertex={vertex} edges={edge} />
+      return <LocationNode key={vertex.value.name} vertex={vertex} color={color} />
+      // }
     });
   }
 
   // todo: my rendering needs some cleanup
   render() {
+    // Stage is a div container
+    // Layer is actual canvas element (so you may have several canvases in the stage)
+    // And then we have canvas shapes inside the Layer
     return (
-      <div id="container"> 
-        <div className="population-center">
-          <h2>Population Centers</h2>
-          {this.renderNetwork(this.state.network, "population-center")}
-        </div>
-        <div className="natural-resource">
-          <h2>Natural Resources</h2>
-          {this.renderNetwork(this.state.network, "natural-resource")}
-        </div>
+      <Stage width={gameInit.width} height={gameInit.height}>
+        <Layer>
+          {this.renderEdges()}
+          {this.renderNetwork()}
+          
+        </Layer>
+      </Stage>
+    );
+    // return (
+    //   <div id="container"> 
+    //     <div className="population-center">
+    //       <h2>Population Centers</h2>
+    //       {this.renderNetwork(this.state.network, "population-center")}
+    //     </div>
+    //     <div className="natural-resource">
+    //       <h2>Natural Resources</h2>
+    //       {this.renderNetwork(this.state.network, "natural-resource")}
+    //     </div>
         
-      </div>
-    )
+    //   </div>
+    // )
   }
 }
 

@@ -21,6 +21,7 @@ In the short term, this should just save to localStorage.
 - [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
 - [x] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
 - [ ] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
+  - This may be flawed because it assumes there are already connections, and we're just being more efficient
   - Can implement Dijkstra's Algorithm to do so
 	- Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
 	- Make sure this goes depth-first
@@ -53,6 +54,7 @@ Ideas:
 	- Enhanced train logic, such as newer / more locomotives and customization of trains
 - Introduce events that affect how long it takes for a train to reach a destination, or if a station takes longer for loading / unloading
 	- E.g. if there's a machinery breakdown, a PC's load time may double; if there's a strike and a sentiment check on the PC makes it sound like it will go on for a while, freight forwarders can route through different PCs
+- Introduce events where new resources are found (e.g. oil discovery, etc)
 - Corporate research
  - Efficiency gains are clearer for carriers (faster trains, improved refridgeration, etc)
  - Locations (so government research) could benefit from improved switching

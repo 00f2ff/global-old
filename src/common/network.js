@@ -6,10 +6,18 @@ import Edge from "./edge";
  * The Network class is a bidirectional (undirected) multigraph, modeled as an adjacency map.
  * 
  * The form is:
- * {vertex1: [
- * 	{vertex2: [edge]},
- *  {vertex3: [edge]}
- * ]}
+ * {
+ * 	vertex1: {
+ * 		vertex2: [edge],
+ *  	vertex3: [edge]
+ * 	},
+ * 	vertex2: {
+ * 		vertex1: [edge]
+ * 	},
+ * 	vertex3: {
+ * 		vertex1: [edge]
+ * 	}
+ * }
  * 
  * This internal map is a normal Map, and symbolizes the multiple edges with different values that can 
  * connect two vertices.

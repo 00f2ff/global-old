@@ -48,3 +48,8 @@ th {
 td {
   padding-left: 10px;
 }
+
+canvas {
+  left: 100px;
+  top: 100px;
+}

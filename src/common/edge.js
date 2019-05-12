@@ -4,14 +4,14 @@ class Edge {
 	 * Since the graph is bidirectional, "from" and "to" don't mean much.
 	 * 
 	 * @param {*} value In the future this will track things like type of route
-	 * @param {Vertex} from  Vertex
-	 * @param {Vertex} to    Vertex
+	 * @param {Vertex} v1  Vertex
+	 * @param {Vertex} v2    Vertex
 	 */
-	constructor(from, to, value) {
-		this.from = from;
-		this.to = to;
+	constructor(v1, v2, value) {
+		this.v1 = v1;
+		this.v2 = v2;
 		this.value = value;
-		this.distance = Math.hypot(from.x - to.x, from.y - to.y); // this can become a function if we stop capturing "from"
+		this.distance = Math.hypot(v1.x - v2.x, v1.y - v2.y); // this can become a function if we stop capturing "from"
 	}
 }
 

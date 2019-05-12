@@ -1,8 +1,9 @@
 import Vertex from './common/vertex';
 
 const gameInit = {
-  width: 1000,
-  height: 1000,
+  width: 500,
+  height: 500,
+  padding: 50,
   // enhancement: each good should have its on quotient; quotient should cut costs or something for NRs
   demandQuotient: (low = 0.5, high = 2) => { return Math.random() * (high - low) + low; },
   stationCost: (duration) => { return duration; },
@@ -51,6 +52,12 @@ const gameInit = {
     }
     return shuffled.slice(0, quantity);           
   },
+  randomBoundedPoint: (num) => {
+    return Math.floor(Math.random() * (num - gameInit.padding * 2 + 1) + gameInit.padding);
+  },
+  createVertex: (value) => { 
+    return new Vertex(value, gameInit.randomBoundedPoint(gameInit.width), gameInit.randomBoundedPoint(gameInit.height));
+  },
   // locations capture just the resource key name, not the value itself. This should enable updating from a central
   // source of truth
   createNaturalResource: (name, size, good) => {
@@ -73,7 +80,7 @@ const gameInit = {
       value.goods.push(randomKey);
     }
 
-    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
+    return gameInit.createVertex(value);
   },
   createPopulationCenter: (name, size) => {
     const duration = gameInit.locationSize[size]["stationDuration"];
@@ -87,7 +94,7 @@ const gameInit = {
       stationCost: gameInit.stationCost(duration),
       demandQuotient: gameInit.demandQuotient(),
     }
-    return new Vertex(value, Math.random() * gameInit.width, Math.random() * gameInit.height);
+    return gameInit.createVertex(value);
   }
 }
 
