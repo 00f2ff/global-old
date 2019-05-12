@@ -15,17 +15,27 @@ Example algorithms are as follows:
 
 In the short term, this should just save to localStorage. 
 
+Enhancement to padding in point-setting: create buffers around locations that can't have other points be dropped in. I bet I can find some algorithm that fills available space minus existing areas.
 
 ## To do:
+1. Make a copy of the network as-is
+2. Add edges (exceeding size limits) that connect every PC to every other PC
+3. Find the shortest-path tree where each root node is a PC and it's seeking out matching resources
+ - This uses Dijkstra's
+4. Compare the edges found in the as-is network with the paths calculated by the shortest-path tree
+ - If any multi-hop paths sum to a distance smaller than a PC's direct edge with a NR, prune the original edge and 
+   replace with the edges comprising that path
+ - Consider pruning edges between PCs that aren't part of a shortest-path to get back to sizing constraints
+   - Should visualize before this, however
+
 ### Map Generation
 - [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
 - [x] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
 - [ ] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
-  - This may be flawed because it assumes there are already connections, and we're just being more efficient
   - Can implement Dijkstra's Algorithm to do so
 	- Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
-	- Make sure this goes depth-first
 - [ ] I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
+  - There was the good point about making sure smaller PCs aren't passed by, but I think that's resolved by ensuring every PC connects with an NR, even if indirectly
 ### Market
 - 0.0.1/2 are likely already implemented
 - [ ] Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
@@ -87,8 +97,7 @@ Notes from Scala:
   0.0.3 rail: edges are a proximity function, with a depth-first approach to connecting PCs together, based on demand.
               Update: what does this mean? Presumably PCs are connected together, but is that based on closer resources?
   0.0.4 rail: 0.0.3 + size indicating parallel edges to other PCs in all instances (removing disjoint nodes).
-  0.0.5 rail: 0.0.4 + There should not be full connectivity, so some restrictions need to be placed to make sure not all
-  PCs connect. I think
+  0.0.5 rail: 0.0.4 + There should not be full connectivity, so some restrictions need to be placed to make sure not all PCs connect. I think
   parallel edges should still be a proximity function, so think about geometries in which smaller PCs can be added to a
   route rather than passed by (e.g. length <= - [x]2 of original length to include). This could increase the number of edges
   to a PC beyond its city size, which is fine.

@@ -171,8 +171,8 @@ class Game extends React.Component {
     // Dictate how many of each NR will be initialized and at what size
     // todo: later, consider changing how many of each resource _type_ is initialized
     let NRSettings = { // todo: when this is sparse, the initialization (non-Dijkstra) sometimes fails
-      small: 3,
-      medium: 3,
+      small: 1,
+      medium: 2,
       large: 3
     };
     try {
@@ -275,12 +275,7 @@ class Game extends React.Component {
   renderNetwork() {
     return [...this.state.network].map((entry, index) => {
       const [vertex, edges] = entry;
-      // first render edges (note: this will result in twice-drawn edges because of undirected nature)
-      // todo: when I clean up how edges are created, this should draw every edge, just just the vertex-vertex
-      // for (let edge of edges) {
-      //   const to = edge[0];
-      //   return <Route key={`${vertex.value.name} to ${to.value.name}`} v1={vertex} v2={to} />
-      // }
+      // for some reason, if I render the routes, it doesn't render all nodes...
 
 
       // Then render vertices
