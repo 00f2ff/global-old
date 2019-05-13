@@ -6,18 +6,18 @@ import Edge from "./edge";
  * The Network class is a bidirectional (undirected) multigraph, modeled as an adjacency map.
  * 
  * The form is:
- * {
- * 	vertex1: {
+ * Network(
+ * 	vertex1: Map(
  * 		vertex2: [edge],
  *  	vertex3: [edge]
- * 	},
- * 	vertex2: {
+ * 	),
+ * 	vertex2: Map(
  * 		vertex1: [edge]
- * 	},
- * 	vertex3: {
+ * 	),
+ * 	vertex3: Map(
  * 		vertex1: [edge]
- * 	}
- * }
+ * 	)
+ * )
  * 
  * This internal map is a normal Map, and symbolizes the multiple edges with different values that can 
  * connect two vertices.
@@ -68,10 +68,15 @@ class Network extends Map {
 				return map;
 			}
 
-			let a = this.set(v1, addSingleEdge(v1, v2)).set(v2, addSingleEdge(v2, v1));
-			// console.log(a);
-			return a;
+			return this.set(v1, addSingleEdge(v1, v2)).set(v2, addSingleEdge(v2, v1));
 		}
+	}
+
+	// todo: add error handling
+	// A very simple removal function that deletes the map entry on each vertex, rather than removing the edge itself
+	removeEdge(v1, v2) {
+		this.get(v1).delete(v2);
+		this.get(v2).delete(v1);
 	}
 
 	// collectEdges() {

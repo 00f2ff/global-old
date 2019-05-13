@@ -24,28 +24,26 @@ there may be an enhancement for path-finding that connects every NR to a particu
 
 algo practice: study how Dijkstra's works. I think I have the gist of it, but putting it into practice is tricky
 
+Each PC begins by connecting to goods-1 NRs
+If we find that a PC _could_ have a direct connection to an NR, still have it route through another city
+ - In the future, players can petition to build rail between the NR and the PC as a direct line
+
+A big refactor todo will be to add network helpers that can filter to find keys of a particular type
+ - this avoids needing to search through PCs or NRs as the prior list, which extends my ability to call algos 
+   for other purposes
+
 ## To do:
-1. Make a copy of the network as-is
-2. Add edges (exceeding size limits) that connect every PC to every other PC
-3. Find the shortest-path tree where each root node is a PC and it's seeking out matching resources
- - This uses Dijkstra's
- - ... I may not need a shortest-path tree; I may just get to use Dijkstra's and then filter on the result
-4. Compare the edges found in the as-is network with the paths calculated by the shortest-path tree
- - If any multi-hop paths sum to a distance smaller than a PC's direct edge with a NR, prune the original edge and 
-   replace with the edges comprising that path
- - Consider pruning edges between PCs that aren't part of a shortest-path to get back to sizing constraints
-   - Should visualize before this, however
+
 
 ### Map Generation
 - [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)
 - [x] Add edges between PCs and NRs for each demanded resource, but connect the closest of each NR to that PC
-- [ ] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
+- [x] Find the shortest path to each NR for each resource demanded by a PC, even if that means NR-PC-PC
   - Can implement Dijkstra's Algorithm to do so
 	- Analyze whether this results in multiple edges between PCs, which is ok and may be preferable / more interesting
-- [ ] I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
+- [x] I think 0.0.4 and 0.0.5 should be satisfied by an appropriate multigraph build from Dijkstra's
   - There was the good point about making sure smaller PCs aren't passed by, but I think that's resolved by ensuring every PC connects with an NR, even if indirectly
 ### Market
-- 0.0.1/2 are likely already implemented
 - [ ] Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
 - [ ] Research and implement a pseudo-random function that fluctuates demand on a per-PC basis.
 - [ ] Refactor demand function to accept a +/- across all PCs for future global event simulation
@@ -115,8 +113,7 @@ Notes from Scala:
   /*
   Once the initialized map is in a good spot, it will be time to create the market. I think PCs themselves shouldn't
   store market data, but rather a potentially mutating object does for each PC and resource.
-  Market 0.0.1: If this design holds, an object leveraged in a game loop that changes demand pricing for each PC by randomly
-  selecting with a Vector. This requires a change to Global to include a main() method
+  Market 0.0.1: If this design holds, an object leveraged in a game loop that changes demand pricing for each PC by randomly selecting with a Vector. This requires a change to Global to include a main() method
   Market 0.0.2: Establish a value for each resource, and change demand pricing to be along a quotient axis to establish rate
   Market 0.0.3: Scale demand axis as a proximity function, where the farther a PC is from a NR, the more it is willing to pay
   Market 0.0.4: Research and implement a randomized function that fluctuates demand on a per-PC basis.
