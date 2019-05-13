@@ -253,28 +253,29 @@ export const populateNetwork = () => {
       // Match only on NRs that have the correct good and are not already at edge capacity
       let matchesGood = NRs.filter(x => x.value.goods[0] === good && !atEdgeCapacity(network, x));
       let closest = [];
-      for (let nr of matchesGood) {
+      matchesGood.forEach((nr) => {
         const dist = pc.distanceTo(nr);
         if (closest.length === 0 || dist < closest[1]) {
           closest = [nr, dist];
         }
-      }
+      });
       return closest[0];
     }
     
     // Create edges
-    for (let pc of shuffle(PCs, PCs.length)) {
+    shuffle(PCs, PCs.length).forEach((pc) => {
       // no PC directly connects to _every_ one of its demanded goods
-      for (let good of shuffle(pc.value.goods, pc.value.goods.length - 1)) { 
+      shuffle(pc.value.goods, pc.value.goods.length - 1).forEach((good) => { 
         const closestNR = findClosestNR(network, pc, good);
         network.addEdge(pc, closestNR, pc.distanceTo(closestNR));
-      }
-    }
+      });
+    });
 
     // Prune vertices that have no edges
+    // this is one of the only functions of mine that does in fact not perform mutation... fix that
     const prune = (network) => {
       let networkCopy = network;
-      for (let kv of Array.from(network.entries())) {
+      for (let kv of network.entries()) {
         const [key, value] = kv;
         if (value.size === 0) {
           networkCopy.delete(key);
@@ -285,28 +286,29 @@ export const populateNetwork = () => {
 
     /////////////// Shortest-path starts here
     // Add edges (exceeding size limits) that connect every PC to every other PC
-    for (let pc1 of PCs) {
-      for (let pc2 of PCs) {
+    PCs.forEach((pc1) => {
+      PCs.forEach((pc2) => {
         if (pc1 !== pc2) {
           network.addEdge(pc1, pc2, pc1.distanceTo(pc2));
         }
-      }
-    }
+      });
+    });
 
     const remainingNRs = Array.from(network.entries()).filter(kv => kv[0].value.type === "natural-resource")
 
     // Find all optimal paths from Dijkstra's (except direct connections)
     let optimalResults = new Map();
-    for (let pc of PCs) {
-      for (let good of pc.value.goods) {
+    PCs.forEach((pc) => {
+      pc.value.goods.forEach((good) => {
         const viableNRs = remainingNRs.filter(x => x[0].value.goods[0] === good)
         const viablePaths = viableNRs.map(x => dijkstra(network, pc, x[0])); // need vertex itself
         let optimalResult;
-        for (let result of viablePaths) {
+        viablePaths.forEach((result) => {
           if (!optimalResult || result.distance < optimalResult.distance) {
             optimalResult = result;
           }
-        }
+        });
+
         if (optimalResults.has(pc)) {
           let arr = optimalResults.get(pc)
           arr.push(optimalResult);
@@ -314,31 +316,36 @@ export const populateNetwork = () => {
         } else {
           optimalResults.set(pc, [optimalResult])
         }
-      }
-    }
+      });
+    });
 
     // Remove edges connecting to other PCs
-    for (let pc1 of PCs) {
-      for (let pc2 of PCs) {
+    // for (let pc1 of PCs) {
+    PCs.forEach((pc1) => {
+      PCs.forEach((pc2) => {
         if (pc1 !== pc2) {
           network.removeEdge(pc1, pc2);
         }
-      }
+      });
+    });
+
+    const locationSuppliesGood = (nr, good) => {
+      return nr.value.goods[0] === good;
     }
 
     // Finds the optimalResult (distance and path) for a particular PC's good
     const findGoodOptimalResult = (pc, good) => {
       const ors = optimalResults.get(pc);
-      return ors.filter(or => or.path[or.path.length - 1].value.goods[0] === good)[0]
+      return ors.filter(or => locationSuppliesGood(or.path[or.path.length - 1], good))[0]
     }
 
     const findExistingNRForGood = (network, pc, good) => {
-      return Array.from(network.get(pc).entries()).filter(x => x[0].value.goods[0] === good)[0];
+      return Array.from(network.get(pc).entries()).filter(x => locationSuppliesGood(x[0], good))[0];
     }
 
     // Replace edges to NRs if it's shorter to travel along an optimalResult (use original network)
-    for (let pc of PCs) {
-      for (let good of pc.value.goods) {
+    PCs.forEach((pc) => {
+      pc.value.goods.forEach((good) => {
         const existingNR = findExistingNRForGood(network, pc, good);
         const optimalResult = findGoodOptimalResult(pc, good);
         if (!existingNR || optimalResult.distance < existingNR[1].weight) {
@@ -348,8 +355,8 @@ export const populateNetwork = () => {
             network.addEdge(path[i], path[i+1], path[i].distanceTo(path[i+1]));
           }
         }
-      }
-    }
+      });
+    });
     // todo: decide if it's worth keeping optimalResults around since it keeps track of paths 
     // it could be useful to capture for an individual vertex's data maybe
 

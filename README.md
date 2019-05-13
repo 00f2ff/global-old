@@ -50,6 +50,7 @@ A big refactor todo will be to add network helpers that can filter to find keys 
   - Events may include things like reduction in NR availability (e.g. mining accident) 
 ### Gameplay -- use redux for interactivity and state
 Ideas:
+- The bigger a PC is, the more _quantity_ it will look for of a good
 - When a PC gets too much of a resource, that depresses how much it's willing to pay
 - Add proper naming to things (randomized, but have it make sense)
 - Implement Freight Forwarders first

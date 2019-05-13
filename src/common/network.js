@@ -79,6 +79,8 @@ class Network extends Map {
 		this.get(v2).delete(v1);
 	}
 
+	
+
 	// collectEdges() {
 	// 	let edges = [];
 

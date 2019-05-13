@@ -26,16 +26,37 @@ code {
   padding: 10px;
   /* width: 200px; */
   box-shadow: 0px 2px 4px rgba(66, 66, 66, 0.5);
-  height: 230px;
+  /* height: 230px; */
 }
 
-.population-center {
+#root { /* todo: add rows too because Player and Map should be on first row and aligned */
+  display: grid;
+  grid-template-columns: repeat(12, [col-start] 1fr);
+  grid-gap: 1em;
+}
+
+.left {
+  grid-column: col-start 1 / span 6;
+}
+
+.player {
+  height: 500px;
+  /* width: 100%; */
+  /* width: 100px;
+  height: 10px; */
+}
+
+.right {
+  grid-column: col-start 7 / span 12;
+}
+
+/* .population-center {
   grid-column: col-start 1 / span 6;
 }
 
 .natural-resource {
   grid-column: col-start 7 / span 12;
-}
+} */
 
 h2 {
   text-align: center;
@@ -51,5 +72,5 @@ td {
 
 canvas {
   left: 100px;
-  top: 100px;
+  top: 50px;
 }
