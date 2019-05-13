@@ -33,7 +33,11 @@ A big refactor todo will be to add network helpers that can filter to find keys 
    for other purposes
 
 ## To do:
+Rethink how I handle edges. There's the uniqueness problem, but I need to think more carefully about what it means for goods to flow via an edge and whatnot. I imagine parallel routes would be a single object rather than 2 distinct edges, as they represent parallel rails
 
+Think more carefully about how I can intelligently apply the Map API to perform the operations I want
+
+Consider adding a function to network or vertex (probably vertex) that filters on something about its value using a higher-order function
 
 ### Map Generation
 - [x] Add edges to connect each PC to one NR for each of the PC's demanded resources, at random, but limited based on the size of each NR/PC -- this may lead to a disconnected graph (can test for it visually)

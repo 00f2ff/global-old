@@ -79,13 +79,33 @@ class Network extends Map {
 		this.get(v2).delete(v1);
 	}
 
-	
+	/**
+	 * Returns an array of all vertex-Map pairs 
+	 */
+	getVerticesWithValues() {
+		return Array.from(this.entries());
+	}
 
-	// collectEdges() {
-	// 	let edges = [];
+	/**
+	 * Returns an array of all vertices
+	 */
+	getVertices() {
+		return Array.from(this.keys());
+	}
 
-	// }
-
+	/**
+	 * Returns a list of all edges and their constituent vertices in form of:
+	 * [[v1, v2, edge]]
+	 */
+	getEdges() { 
+		return this.getVerticesWithValues().flatMap(kv => {
+			const [v1, value] = kv; 
+			return Array.from(value.entries()).flatMap(e => {
+				const [v2, edges] = e;
+				return edges.map(x => [v1, v2, x]);
+			});
+		})
+	}
 }
 
 export default Network;

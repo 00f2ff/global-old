@@ -30,7 +30,7 @@ class Map extends React.Component {
     return this.props.edges.map((e) => {
       const v1 = e[0], v2 = e[1];
       return <Line 
-              key={`${v1.value.name} to ${v2.value.name}`}
+              key={`${v1.value.name} to ${v2.value.name} in ${e[2].weight}`}
               points={[v1.x, v1.y, v2.x, v2.y]}
               stroke="red"
               strokeWidth={2}

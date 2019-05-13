@@ -294,7 +294,7 @@ export const populateNetwork = () => {
       });
     });
 
-    const remainingNRs = Array.from(network.entries()).filter(kv => kv[0].value.type === "natural-resource")
+    const remainingNRs = network.getVerticesWithValues().filter(kv => kv[0].value.type === "natural-resource")
 
     // Find all optimal paths from Dijkstra's (except direct connections)
     let optimalResults = new Map();

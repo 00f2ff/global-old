@@ -23,6 +23,8 @@ class Player extends React.Component {
   counter: state.counter + props.increment
 }));
  */
+// todo: I'm not certain I'm using immutability correctly. Perhaps I just need to make sure my components don't 
+// modify state?
 class Game extends React.Component {
   /**
    * The network initializes mutably, but after that point we keep immutable copies in a history
@@ -57,28 +59,14 @@ class Game extends React.Component {
     });
   }
    */
-
-  // todo: refactor this stuff so I only compute it once
-  edges() {
-    let allEdges = [];
-    [...this.state.network].map((entry, index) => {
-      const [v1, edges] = entry;
-      // first render edges (note: this will result in twice-drawn edges because of undirected nature)
-      // todo: when I clean up how edges are created, this should draw every edge, just the vertex-vertex
-      for (let edge of edges) {
-        const v2 = edge[0];
-        allEdges.push([v1, v2]);
-      }
-    });
-    return allEdges;
-  }
   
   vertices() {
-    return Array.from(this.state.network.entries()).map(kv => kv[0]);
+    return this.state.network.getVerticesWithValues().map(kv => kv[0]);
   }
 
-  filteredNetwork(str) {
-    return Array.from(this.state.network.entries()).filter(kv => kv[0].value.type === str);
+  filteredNetwork(str) { // todo: figure out why keys() isn't the same as entries() .map(x => x[0])
+    //    return this.state.network.getVertices().filter(v => v.value.type === str);
+    return this.state.network.getVerticesWithValues().filter(kv => kv[0].value.type === str);
   }
 
   // todo: my rendering needs some cleanup
@@ -90,7 +78,7 @@ class Game extends React.Component {
           <LocationSet cn="populationCenters" verticesAndEdges={this.filteredNetwork("population-center")}></LocationSet>
         </div>
         <div className="right">
-          <Map dimensions={util.dimensions} edges={this.edges()} vertices={this.vertices()}></Map>
+          <Map dimensions={util.dimensions} edges={this.state.network.getEdges()} vertices={this.vertices()}></Map>
           <LocationSet cn="naturalResources" verticesAndEdges={this.filteredNetwork("natural-resource")}></LocationSet>
         </div>
       </React.Fragment>
