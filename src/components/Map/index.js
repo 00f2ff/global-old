@@ -1,13 +1,13 @@
-import * as util from '../../util.js';
 import React from 'react';
 import { Stage, Layer, Circle, Line } from 'react-konva';
+import { connect } from 'react-redux';
 // import Konva from 'konva';
 
 
 class LocationNode extends React.Component {
 
   dimensions() {
-    let scalar = util.locationSize[this.props.vertex.value.size]["numGoodsDemanded"];
+    let scalar = this.props.utils.locationSize[this.props.vertex.value.size]["numGoodsDemanded"];
     return 10 * scalar;
   }
 
@@ -46,7 +46,7 @@ class Map extends React.Component {
       } else {
         color = "blue";
       }
-      return <LocationNode key={v.value.name} vertex={v} color={color} />
+      return <LocationNode key={v.value.name} vertex={v} color={color} utils={this.props.utils} />
     });
   }
 
@@ -55,7 +55,7 @@ class Map extends React.Component {
   // And then we have canvas shapes inside the Layer
   render() {
     return (
-      <Stage className="map" width={this.props.dimensions.width} height={this.props.dimensions.height}> 
+      <Stage className="map" width={this.props.utils.dimensions.width} height={this.props.utils.dimensions.height}> 
         <Layer>
           {this.renderEdges()}
           {this.renderVertices()}
@@ -65,4 +65,10 @@ class Map extends React.Component {
   }
 }
 
-export default Map;
+function mapStateToProps(state) {
+  return {
+    utils: state.utils,
+  }
+}
+
+export default connect(mapStateToProps)(Map);

@@ -53,14 +53,15 @@ Consider adding a function to network or vertex (probably vertex) that filters o
 - [ ] Refactor demand function to accept a +/- across all PCs for future global event simulation
   - Events may include things like reduction in NR availability (e.g. mining accident) 
 ### Gameplay -- use redux for interactivity and state
-Ideas:
-- The bigger a PC is, the more _quantity_ it will look for of a good
-- When a PC gets too much of a resource, that depresses how much it's willing to pay
-- Add proper naming to things (randomized, but have it make sense)
+Ideas: -- begin by learning redux and implementing FFs / player logic
 - Implement Freight Forwarders first
  - For starters, assume infinite supply/demand quantity, limit of one train per edge
  - Goods will travel via setTimeout, though I may want to inject routes into a global setInterval that performs checks
  - First NR-PC routes, but later multi-location routing driven by Dijktra's
+- The bigger a PC is, the more _quantity_ it will look for of a good
+- When a PC gets too much of a resource, that depresses how much it's willing to pay
+- Add proper naming to things (randomized, but have it make sense)
+
 - PC size boosting as more goods flow through it
 - Add more resource types and prices
   - Also manufacturing, so resources to one PC will cause PC to produce a different kind of resource
@@ -90,6 +91,7 @@ Ideas:
  - Loans could be mid-to-high-interest and issued by banks, and come with geographic flexibility
 - Multiple trains per edge (this requires advanced routing)
  - e.g. perhaps a track has a switch implemented in the middle of a route (case of fast/slow train, or trains heading toward one another). If this happens, potentially in the future a small PC could crop up there
+- Refactor to use immutable.js https://immutable-js.github.io/immutable-js/
 
 Notes from Scala:
 /*

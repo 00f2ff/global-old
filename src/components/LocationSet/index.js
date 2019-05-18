@@ -1,11 +1,11 @@
-import * as util from '../../util.js';
 import React from 'react';
+import { connect } from 'react-redux';
 
 class Location extends React.Component {
 
   renderGoods() {
     return this.props.vertex.value.goods.reduce((acc, g) => {
-      let goodString = `(${g}: ${(util.resources[g]["basePrice"] * this.props.vertex.value.demandQuotient).toFixed(2)})`
+      let goodString = `(${g}: ${(this.props.resources[g]["basePrice"] * this.props.vertex.value.demandQuotient).toFixed(2)})`
       if (acc.length === 0) {
         return goodString;
       } else {
@@ -16,7 +16,7 @@ class Location extends React.Component {
 
   printConnections() {
     return [...this.props.edges.entries()].map((kv, index) => {
-      const [vertex, edges] = kv;
+      const [vertex, ] = kv;
       return vertex.value.name;
     }).join(", ");
   }
@@ -41,7 +41,7 @@ class LocationSet extends React.Component {
   renderLocations() {
     return this.props.verticesAndEdges.map((kv) => {
       const [vertex, edges] = kv;
-      return <Location key={vertex.value.name} vertex={vertex} edges={edges} />
+      return <Location key={vertex.value.name} vertex={vertex} edges={edges} resources={this.props.utils.resources} />
     })
   }
 
@@ -54,4 +54,10 @@ class LocationSet extends React.Component {
   }
 }
 
-export default LocationSet;
+function mapStateToProps(state) {
+  return {
+    utils: state.utils,
+  }
+}
+
+export default connect(mapStateToProps)(LocationSet); // does Location need to be connected too?
